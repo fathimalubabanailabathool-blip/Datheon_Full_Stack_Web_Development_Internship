@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Task Manager</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>My Task Manager</h1>
+        <p>Organise your day. Achieve your goals.</p>
+    </header>
+
+    <main>
+
+        <section class="task-form">
+            <h2>Add a New Task</h2>
+
+            <input
+                type="text"
+                id="task-input"
+                placeholder="Enter your task"
+            >
+
+            <select id="category">
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Study">Study</option>
+            </select>
+
+            <input type="date" id="due-date">
+
+            <button id="add-task">Add Task</button>
+        </section>
+
+        <section class="task-list">
+            <h2>My Tasks</h2>
+
+            <div class="filters">
+                <button data-filter="all">All</button>
+                <button data-filter="active">Active</button>
+                <button data-filter="completed">Completed</button>
+            </div>
+
+            <div id="tasks-container">
+                <!-- Tasks will appear here -->
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
