@@ -1,307 +1,223 @@
 
-// SN Traders - Product Catalog
+// ======================================
+// DATHEON WEATHER FORECAST APPLICATION
+// ======================================
 
-const API_URL = "https://fakestoreapi.com/products";
+// HTML elements
+const cityInput = document.getElementById("city-input");
+const searchButton = document.getElementById("search-btn");
 
-const productContainer = document.getElementById("product-container");
-const loadingMessage = document.getElementById("loading-message");
+const cityName = document.getElementById("city-name");
+const temperature = document.getElementById("temperature");
+const weatherDescription = document.getElementById("weather-description");
+const weatherIcon = document.getElementById("weather-icon");
+
+const humidity = document.getElementById("humidity");
+const windSpeed = document.getElementById("wind-speed");
+const pressure = document.getElementById("pressure");
+
+const forecastContainer = document.getElementById("forecast-container");
 const errorMessage = document.getElementById("error-message");
-const searchInput = document.getElementById("search-input");
-const categoryButtons = document.getElementById("category-buttons");
+const loadingMessage = document.getElementById("loading-message");
 
-let products = [];
-let selectedCategory = "all";
-// Shopping cart - restore saved items
-let cart = JSON.parse(localStorage.getItem("snTradersCart")) || [];
+// OpenWeatherMap API URLs
+const CURRENT_WEATHER_URL =
+    "https://api.openweathermap.org/data/2.5/weather";
 
-// Cart elements
-const cartButton = document.getElementById("cart-btn");
-const cartDrawer = document.getElementById("cart-drawer");
-const cartOverlay = document.getElementById("cart-overlay");
-const closeCartButton = document.getElementById("close-cart");
-const cartItems = document.getElementById("cart-items");
-const cartCount = document.getElementById("cart-count");
-const cartTotal = document.getElementById("cart-total");
-// Convert USD prices to Indian Rupees
-const USD_TO_INR = 93.77;
+const FORECAST_URL =
+    "https://api.openweathermap.org/data/2.5/forecast";
 
-function formatINR(usdPrice) {
-    const rupees = usdPrice * USD_TO_INR;
-
-    return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 2
-    }).format(rupees);
-}
-// Fetch products from FakeStoreAPI
-async function fetchProducts() {
+// Fetch weather information
+async function getWeather(city) {
     try {
-        loadingMessage.textContent = "Loading products...";
-        errorMessage.textContent = "";
+        errorMessage.style.display = "none";
+        loadingMessage.textContent = "Loading weather information...";
+        searchButton.disabled = true;
 
-        const response = await fetch(API_URL);
-
-        if (!response.ok) {
-            throw new Error("Unable to load products.");
+        if (!city.trim()) {
+            throw new Error("Please enter a city name.");
         }
 
-        products = await response.json();
+       const currentUrl =
+    `/.netlify/functions/weather?city=${encodeURIComponent(city)}&type=current`;
+
+const forecastUrl =
+    `/.netlify/functions/weather?city=${encodeURIComponent(city)}&type=forecast`;
+        // Fetch both API responses
+        const [currentResponse, forecastResponse] = await Promise.all([
+            fetch(currentUrl),
+            fetch(forecastUrl)
+        ]);
+
+        // Check for API errors
+        if (!currentResponse.ok) {
+            if (currentResponse.status === 404) {
+                throw new Error("City not found. Please check the spelling.");
+            }
+
+            if (currentResponse.status === 401) {
+    throw new Error("Weather API authentication failed. Please check the Netlify API key.");
+}
+
+            throw new Error("Unable to retrieve weather information.");
+        }
+
+        if (!forecastResponse.ok) {
+            throw new Error("Unable to retrieve the five-day forecast.");
+        }
+
+        const currentData = await currentResponse.json();
+        const forecastData = await forecastResponse.json();
+
+        displayWeather(currentData);
+        displayForecast(forecastData);
 
         loadingMessage.textContent = "";
-
-        displayCategories();
-        displayProducts(products);
 
     } catch (error) {
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = "block";
         loadingMessage.textContent = "";
-        errorMessage.textContent =
-            "Something went wrong. Please try again.";
-        console.error(error);
+        forecastContainer.innerHTML =
+            "<p>Forecast unavailable. Please try again.</p>";
+
+    } finally {
+        searchButton.disabled = false;
     }
 }
 
-// Display category filter buttons
-function displayCategories() {
-    const categories = [
-        ...new Set(products.map(product => product.category))
-    ];
+// Display current weather
+function displayWeather(data) {
+    cityName.textContent =
+        `${data.name}, ${data.sys.country}`;
 
-    categoryButtons.innerHTML = `
-        <button class="active" data-category="all">All</button>
-        ${categories.map(category => `
-            <button data-category="${category}">
-                ${category}
-            </button>
-        `).join("")}
-    `;
+    temperature.textContent =
+        `${Math.round(data.main.temp)}°C`;
 
-    categoryButtons.querySelectorAll("button").forEach(button => {
-        button.addEventListener("click", () => {
-            selectedCategory = button.dataset.category;
+    weatherDescription.textContent =
+        data.weather[0].description;
 
-            categoryButtons.querySelectorAll("button")
-                .forEach(btn => btn.classList.remove("active"));
+    humidity.textContent =
+        `${data.main.humidity}%`;
 
-            button.classList.add("active");
-            filterProducts();
-        });
+    windSpeed.textContent =
+        `${data.wind.speed} m/s`;
+
+    pressure.textContent =
+        `${data.main.pressure} hPa`;
+
+    weatherIcon.src =
+        `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+    weatherIcon.alt = data.weather[0].description;
+    weatherIcon.hidden = false;
+
+    changeBackground(data);
+}
+
+function changeBackground(data) {
+    const condition = data.weather[0].main.toLowerCase();
+
+    const currentTime = data.dt;
+    const sunrise = data.sys.sunrise;
+    const sunset = data.sys.sunset;
+
+    const isNight = currentTime < sunrise || currentTime >= sunset;
+
+    if (isNight) {
+        document.body.style.background =
+            "linear-gradient(135deg, #141e30, #243b55)";
+    } 
+    else if (condition.includes("rain") ||
+             condition.includes("drizzle") ||
+             condition.includes("thunderstorm")) {
+        document.body.style.background =
+            "linear-gradient(135deg, #485563, #29323c)";
+    } 
+    else if (condition.includes("snow")) {
+        document.body.style.background =
+            "linear-gradient(135deg, #83a4d4, #b6fbff)";
+    } 
+    else if (condition.includes("cloud")) {
+        document.body.style.background =
+            "linear-gradient(135deg, #757f9a, #d7dde8)";
+    } 
+    else if (condition.includes("clear")) {
+        document.body.style.background =
+            "linear-gradient(135deg, #56ccf2, #2f80ed)";
+    } 
+    else {
+        document.body.style.background =
+            "linear-gradient(135deg, #667eea, #764ba2)";
+    }
+}
+
+// Display five-day forecast
+function displayForecast(data) {
+    const dailyForecasts = {};
+
+    // Group forecast entries by date
+    data.list.forEach(item => {
+        const date = item.dt_txt.split(" ")[0];
+
+        if (!dailyForecasts[date]) {
+            dailyForecasts[date] = [];
+        }
+
+        dailyForecasts[date].push(item);
     });
-}
 
-// Display product cards
-function displayProducts(productList) {
-    if (productList.length === 0) {
-        productContainer.innerHTML =
-            "<p>No products found.</p>";
-        return;
-    }
+    // Select one forecast near midday for each day
+    const fiveDays = Object.values(dailyForecasts)
+        .map(dayEntries => {
+            return dayEntries.reduce((closest, item) => {
+                const hour = Number(item.dt_txt.split(" ")[1].slice(0, 2));
 
-    productContainer.innerHTML = productList.map(product => `
-        <div class="product-card">
-            <img src="${product.image}" alt="${product.title}">
+                const closestHour =
+                    Number(closest.dt_txt.split(" ")[1].slice(0, 2));
 
-            <h3>${product.title}</h3>
+                return Math.abs(hour - 12) < Math.abs(closestHour - 12)
+                    ? item
+                    : closest;
+            });
+        })
+        .slice(0, 5);
 
-            <p class="price">
-    ${formatINR(product.price)}
-</p>
+    // Create forecast cards
+    forecastContainer.innerHTML = fiveDays.map(day => {
+        const date = new Date(day.dt * 1000);
 
-            <p>⭐ ${product.rating.rate} (${product.rating.count} reviews)</p>
-
-            <button class="add-cart-btn" data-id="${product.id}">
-                Add to Cart
-            </button>
-        </div>
-    `).join("");
-}
-
-// Save cart to browser storage
-function saveCart() {
-    localStorage.setItem("snTradersCart", JSON.stringify(cart));
-}
-
-// Add product to cart
-function addToCart(productId) {
-    const product = products.find(item => item.id === productId);
-
-    if (!product) return;
-
-    const existingItem = cart.find(item => item.id === productId);
-
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({
-            ...product,
-            quantity: 1
+        const dayName = date.toLocaleDateString("en-US", {
+            weekday: "short"
         });
-    }
 
-    saveCart();
-    updateCart();
-}
+        const icon = day.weather[0].icon;
 
-// Remove product from cart
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
+        return `
+            <div class="forecast-card">
+                <h3>${dayName}</h3>
 
-    saveCart();
-    updateCart();
-}
+                <img
+                    src="https://openweathermap.org/img/wn/${icon}@2x.png"
+                    alt="${day.weather[0].description}"
+                >
 
-// Change product quantity
-function updateQuantity(productId, change) {
-    const item = cart.find(item => item.id === productId);
+                <p>${Math.round(day.main.temp)}°C</p>
 
-    if (!item) return;
-
-    item.quantity += change;
-
-    if (item.quantity <= 0) {
-        removeFromCart(productId);
-        return;
-    }
-
-    saveCart();
-    updateCart();
-}
-
-// Calculate cart total in INR
-function calculateTotal() {
-    return cart.reduce((total, item) => {
-        return total + (item.price * USD_TO_INR * item.quantity);
-    }, 0);
-}
-
-// Update cart display
-function updateCart() {
-    const totalItems = cart.reduce(
-        (total, item) => total + item.quantity, 0
-    );
-
-    cartCount.textContent = totalItems;
-
-    if (cart.length === 0) {
-        cartItems.innerHTML = "<p>Your cart is empty.</p>";
-    } else {
-        cartItems.innerHTML = cart.map(item => `
-            <div class="cart-item">
-                <img src="${item.image}" alt="${item.title}">
-
-                <div>
-                    <h4>${item.title}</h4>
-                    <p>${formatINR(item.price)}</p>
-
-                    <button onclick="updateQuantity(${item.id}, -1)">−</button>
-                    <span>${item.quantity}</span>
-                    <button onclick="updateQuantity(${item.id}, 1)">+</button>
-
-                    <button onclick="removeFromCart(${item.id})">
-                        Remove
-                    </button>
-                </div>
+                <p>${day.weather[0].main}</p>
             </div>
-        `).join("");
+        `;
+    }).join("");
+}
+
+// Search button
+searchButton.addEventListener("click", function() {
+    getWeather(cityInput.value);
+});
+
+// Search using Enter key
+cityInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        getWeather(cityInput.value);
     }
-
-    cartTotal.textContent = calculateTotal().toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
-// Open shopping cart
-cartButton.addEventListener("click", () => {
-    cartDrawer.classList.add("open");
-    cartOverlay.classList.add("show");
 });
-
-// Close shopping cart
-function closeCart() {
-    cartDrawer.classList.remove("open");
-    cartOverlay.classList.remove("show");
-}
-
-closeCartButton.addEventListener("click", closeCart);
-cartOverlay.addEventListener("click", closeCart);
-
-// Handle Add to Cart buttons
-productContainer.addEventListener("click", event => {
-    const button = event.target.closest(".add-cart-btn");
-
-    if (!button) return;
-
-    addToCart(Number(button.dataset.id));
-});
-
-// Restore cart when page loads
-updateCart();
-
-// Search and category filtering
-function filterProducts() {
-    const searchText = searchInput.value.toLowerCase();
-
-    const filteredProducts = products.filter(product => {
-        const matchesSearch =
-            product.title.toLowerCase().includes(searchText);
-
-        const matchesCategory =
-            selectedCategory === "all" ||
-            product.category === selectedCategory;
-
-        return matchesSearch && matchesCategory;
-    });
-
-    displayProducts(filteredProducts);
-}
-
-// Search while typing
-searchInput.addEventListener("input", filterProducts);
-
-// Checkout elements
-const checkoutButton = document.getElementById("checkout-btn");
-const checkoutModal = document.getElementById("checkout-modal");
-const closeModalButton = document.getElementById("close-modal");
-const confirmOrderButton = document.getElementById("confirm-order");
-
-// Open checkout modal
-checkoutButton.addEventListener("click", () => {
-    if (cart.length === 0) {
-        alert("Your shopping cart is empty!");
-        return;
-    }
-
-    checkoutModal.classList.add("show");
-});
-
-// Close checkout modal
-closeModalButton.addEventListener("click", () => {
-    checkoutModal.classList.remove("show");
-});
-
-// Confirm order
-confirmOrderButton.addEventListener("click", () => {
-    if (cart.length === 0) return;
-
-    const orderTotal = calculateTotal();
-
-    alert(
-        "🎉 Order placed successfully!\n\n" +
-        "Thank you for shopping with SN Traders!\n" +
-        "Order Total: " + formatINR(orderTotal / USD_TO_INR)
-    );
-
-    // Clear shopping cart
-    cart = [];
-
-    saveCart();
-    updateCart();
-
-    // Close checkout and cart
-    checkoutModal.classList.remove("show");
-    closeCart();
-});
-
-// Start the application
-fetchProducts();

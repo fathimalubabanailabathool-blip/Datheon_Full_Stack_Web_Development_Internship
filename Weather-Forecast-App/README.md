@@ -1,28 +1,25 @@
 
-# SN Traders – E-Commerce Product Catalog
+# Weather Forecast App
 
-An interactive and responsive online shopping website developed as Task 4 of my Datheon Full Stack Web Development Internship.
+A responsive Weather Forecast Application developed as Task 3 of my Datheon Full Stack Web Development Internship.
 
 ## About the Project
 
-SN Traders is a mini e-commerce website that allows users to browse products, search for items, filter products by category, manage a shopping cart and complete a simulated checkout.
+This application allows users to search for cities around the world and view current weather information along with a five-day forecast.
 
-Product information is fetched dynamically from FakeStoreAPI.
+Weather information is retrieved dynamically using the OpenWeatherMap API.
 
 ## Features
 
-- Dynamic product catalog using FakeStoreAPI
-- Product search functionality
-- Category-based filtering
-- Product images, prices and ratings
-- Indian Rupee (INR) price display
-- Add products to shopping cart
-- Remove products from cart
-- Increase and decrease product quantities
-- Automatic cart total calculation
-- Shopping cart persistence using localStorage
-- Slide-out shopping cart drawer
-- Simulated checkout and order confirmation
+- Search weather by city name
+- Display current temperature and weather conditions
+- Show humidity, wind speed and atmospheric pressure
+- Display a five-day weather forecast
+- Dynamic weather icons
+- Weather-based background gradients
+- Daytime and nighttime background changes
+- Loading indicator
+- Error handling for invalid city names
 - Responsive mobile-friendly design
 
 ## Technologies Used
@@ -30,19 +27,18 @@ Product information is fetched dynamically from FakeStoreAPI.
 - HTML5
 - CSS3
 - JavaScript
-- FakeStoreAPI
 - Fetch API
 - Async/Await
-- localStorage
+- OpenWeatherMap API
 
 ## API Used
 
-FakeStoreAPI:
-https://fakestoreapi.com/products
+OpenWeatherMap:
+https://openweathermap.org/api
 
 ## Project Structure
 
-SN-Traders/
+Weather-Forecast-App/
 │
 ├── index.html
 ├── style.css
@@ -53,15 +49,17 @@ SN-Traders/
 
 1. Download or clone this repository.
 2. Open the project folder in Visual Studio Code.
-3. Open index.html.
-4. Run the project using Live Server.
-5. Browse products and explore the shopping cart.
+3. Add your own OpenWeatherMap API key in config.js.
+4. Open index.html using Live Server.
+5. Enter a city name and click Search.
 
-## Currency Conversion
+## API Key Security
 
-Product prices are originally provided by FakeStoreAPI in USD.
+The API key is stored locally in config.js and excluded from GitHub using .gitignore.
 
-For this demonstration, prices are converted into Indian Rupees using a fixed sample exchange rate.
+Never upload your private API key to a public repository.
+
+Note: A production deployment should use a secure server-side API proxy to protect the API key.
 
 ## Project Developed By
 
@@ -70,7 +68,3 @@ Fathima Lubaba Bathool MB
 BCA – First Year
 
 Datheon Full Stack Web Development Internship
-
-## Note
-
-This project demonstrates front-end e-commerce functionality. Checkout is simulated and does not process real payments.

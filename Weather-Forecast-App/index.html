@@ -4,78 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SN Traders | Online Store</title>
+    <title>Weather Forecast App</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <nav class="navbar">
-        <h1 class="logo">SN Traders</h1>
+    <main class="weather-app">
 
-        <div class="nav-actions">
-            <button id="cart-btn">
-                🛒 Cart (<span id="cart-count">0</span>)
-            </button>
-        </div>
-    </nav>
+        <header>
+            <h1>Weather Forecast</h1>
+            <p>Discover the weather around the world</p>
+        </header>
 
-    <header class="hero">
-        <h2>Discover Your Favourite Products</h2>
-        <p>Everything you love, all in one place.</p>
-    </header>
-
-    <main class="container">
-
-        <section class="controls">
+        <section class="search-section">
             <input
                 type="text"
-                id="search-input"
-                placeholder="Search products..."
+                id="city-input"
+                placeholder="Enter city name..."
             >
+            <button id="search-btn">Search</button>
+        </section>
 
-            <div id="category-buttons" class="category-buttons">
-                <button class="active" data-category="all">All</button>
+        <p id="error-message"></p>
+        <p id="loading-message"></p>
+
+        <section id="current-weather" class="weather-card">
+            <h2 id="city-name">Search for a city</h2>
+            <img id="weather-icon" src="" alt="Weather icon" hidden>
+
+            <h1 id="temperature">--°C</h1>
+            <p id="weather-description">Weather condition</p>
+
+            <div class="weather-details">
+                <div>
+                    <span>Humidity</span>
+                    <h3 id="humidity">--%</h3>
+                </div>
+
+                <div>
+                    <span>Wind Speed</span>
+                    <h3 id="wind-speed">-- m/s</h3>
+                </div>
+
+                <div>
+                    <span>Pressure</span>
+                    <h3 id="pressure">-- hPa</h3>
+                </div>
             </div>
         </section>
 
-        <p id="loading-message">Loading products...</p>
-        <p id="error-message"></p>
-
-        <section id="product-container" class="product-grid">
+        <section class="forecast-section">
+            <h2>5-Day Weather Forecast</h2>
+            <div id="forecast-container" class="forecast-container">
+                <p>Search for a city to see the forecast.</p>
+            </div>
         </section>
+
+        <footer>
+            <p>Powered by OpenWeatherMap API</p>
+            <p>Created as part of my Datheon Internship</p>
+            <p>Devoleped by Fathima Lubaba Bathool MB</p>
+        </footer>
 
     </main>
 
-    <div id="cart-overlay" class="cart-overlay"></div>
-
-    <aside id="cart-drawer" class="cart-drawer">
-        <div class="cart-header">
-            <h2>Your Shopping Cart</h2>
-            <button id="close-cart">✕</button>
-        </div>
-
-        <div id="cart-items"></div>
-
-        <div class="cart-footer">
-           <h3>Total: ₹<span id="cart-total">0.00</span></h3>
-            <button id="checkout-btn">Proceed to Checkout</button>
-        </div>
-    </aside>
-
-    <div id="checkout-modal" class="modal">
-        <div class="modal-content">
-            <button id="close-modal" class="close-modal">✕</button>
-            <h2>Checkout</h2>
-            <p>Confirm your order to complete your purchase.</p>
-            <button id="confirm-order">Confirm Order</button>
-        </div>
-    </div>
-
-<footer>
-    <p>© 2026 SN Traders | Datheon Internship Project</p>
-    <p>Developed by Fathima Lubaba Bathool MB</p>
-</footer>
-
-    <script src="script.js"></script>
+   <script src="config.js"></script>
+   <script src="script.js"></script>
 </body>
 </html>
